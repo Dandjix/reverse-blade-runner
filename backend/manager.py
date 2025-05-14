@@ -5,7 +5,7 @@ from typing import Dict
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
-        self.chat_history = deque(maxlen=10)
+        self.chat_history = deque(maxlen=100)  # Store the last 100 messages
 
     async def connect(self, websocket: WebSocket) -> str:
         await websocket.accept()
