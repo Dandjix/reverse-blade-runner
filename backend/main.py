@@ -12,7 +12,12 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        username = await websocket.receive_text()
+
+        username = None
+        
+        while not username or username in self.active_connections :
+            username = await websocket.receive_text()
+
         self.active_connections[username] = websocket
         return username
 
