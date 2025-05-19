@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from websocket_chat import router as chat_router
+from chat_router import router as chat_router
 from bot_engine import bot_controller
 import asyncio
 
