@@ -1,0 +1,8 @@
+{
+  "language": "french",
+  "nbBots": 8,
+  "nbPlayers": 2,
+  "context": "context",
+  "messageLength": 40,
+  "messageFrequency": 5
+}
