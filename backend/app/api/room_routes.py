@@ -66,3 +66,35 @@ async def start_game(room_id: str):
         await ws.send_text(f"Your pseudo: {room.pseudos[pid]}")
 
     return {"status": "started"}
+
+@router.get("/room/{room_id}")
+def get_room_info(room_id: str):
+    room = room_manager.get_room(room_id)
+    if not room:
+        return {"error": "Room not found"}
+    return {
+        "room_id": room_id,
+        "name": room.params.name,
+        "language": room.params.language,
+        "min_players": room.params.min_players,
+        "nb_bots": room.params.nb_bots,
+        "current_players": len(room.human_players),
+        "game_started": room.game_started
+    }
+
+@router.get("/rooms")
+def get_all_rooms():
+    rooms = []
+    for room_id, room in room_manager.rooms.items():
+        rooms.append({
+            "room_id": room_id,
+            "name": room.params.name,
+            "language": room.params.language,
+            "min_players": room.params.min_players,
+            "nb_bots": room.params.nb_bots,
+            "current_players": len(room.human_players),
+            "game_started": room.game_started
+        })
+    return {"rooms": rooms}
+
+

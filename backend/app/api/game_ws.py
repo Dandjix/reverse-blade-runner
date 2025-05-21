@@ -3,7 +3,6 @@ import uuid
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.core.room_manager import room_manager
-from .room_routes import start_game  # Facultatif si tu veux déclencher un auto-start
 
 router = APIRouter()
 
@@ -21,9 +20,24 @@ async def websocket_room_endpoint(websocket: WebSocket, room_id: str):
     await websocket.send_text(f"✔️ Connected to room {room_id} with id {player_id}")
 
     try:
+        while not room.game_started:
+            # await websocket.send_text("⏳ Waiting for the game to start...")
+            await asyncio.sleep(1)
+
+        theme = room.game_state.theme if room.game_state else "(unknown)"
+        pseudo = room.pseudos.get(player_id, f"Player{player_id[:4]}")
+        room.pseudos[player_id] = pseudo
+
+        await websocket.send_text(f"🎮 Game started! Theme: {theme}")
+        await websocket.send_text(f"Your pseudo: {pseudo}")
+
+        if room.message_history:
+            await websocket.send_text("💬 Previous messages:")
+            for author, msg in room.message_history:
+                await websocket.send_text(f"{author}: {msg}")
+
         while True:
             message = await websocket.receive_text()
-            pseudo = room.pseudos.get(player_id, "???")
 
             if message.startswith("guess:"):
                 await handle_guess(room, player_id, message[6:].strip())
@@ -35,7 +49,7 @@ async def websocket_room_endpoint(websocket: WebSocket, room_id: str):
         room.human_players.pop(player_id, None)
         room.guessed_by_player.pop(player_id, None)
         room.pseudos.pop(player_id, None)
-        await room.broadcast(f"🚪 {player_id} disconnected.")
+        await room.broadcast(f"🚪 {pseudo} disconnected.")
 
 
 async def handle_guess(room, player_id: str, guess_pseudo: str):
