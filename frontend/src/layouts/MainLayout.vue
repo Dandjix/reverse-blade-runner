@@ -54,6 +54,12 @@ const navigations = [
     icon: 'chat',
     link: '/'
   },
+  {
+    title: 'Lobbies',
+    caption: 'find a game here',
+    icon: 'groups',
+    link: '/lobbies'
+  },
 ]
 
 const leftDrawerOpen = ref(false)
