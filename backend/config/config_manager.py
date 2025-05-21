@@ -27,17 +27,23 @@ def set_config_value(key: str, value, config_path=DEFAULT_CONFIG_PATH):
 def set_language(language: str, config_path=DEFAULT_CONFIG_PATH):
     set_config_value("language", language, config_path)
 
-def set_nb_bots(nb_bots: int, config_path=DEFAULT_CONFIG_PATH):
-    set_config_value("nbBots", nb_bots, config_path)
+def get_language(config_path=DEFAULT_CONFIG_PATH):
+    return get_config_value("language", config_path)
 
 def set_nb_players(nb_players: int, config_path=DEFAULT_CONFIG_PATH):
     set_config_value("nbPlayers", nb_players, config_path)
 
-def set_context(context: str, config_path=DEFAULT_CONFIG_PATH):
-    set_config_value("context", context, config_path)
+def get_nb_players(config_path=DEFAULT_CONFIG_PATH):
+    return get_config_value("nbPlayers", config_path)
 
 def set_message_length(length: int, config_path=DEFAULT_CONFIG_PATH):
     set_config_value("messageLength", length, config_path)
 
+def get_message_length(config_path=DEFAULT_CONFIG_PATH):
+    return get_config_value("messageLength", config_path)
+
 def set_message_frequency(frequency: int, config_path=DEFAULT_CONFIG_PATH):
     set_config_value("messageFrequency", frequency, config_path)
+
+def get_message_frequency(config_path=DEFAULT_CONFIG_PATH):
+    return get_config_value("messageFrequency", config_path)

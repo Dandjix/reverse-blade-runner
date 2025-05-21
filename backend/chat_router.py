@@ -23,7 +23,6 @@ async def websocket_endpoint(websocket: WebSocket):
 @router.post("/context")
 async def postContext(
         language: str = Form(...),
-        context: str = Form(...),
         messageLengths: str = Form(...),
         messageFrequencySeconds: int = Form(...),
         nbBots: int = Form(...)

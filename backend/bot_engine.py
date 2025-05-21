@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import random
 import string
+import config.config_manager as config_manager
 
 BOT_NAMES = ["Alex", "Jamie", "Riley", "Sam", "Casey","Johnson","Dick","Volker","Anthony","Mark"]
 ACTIVE_BOTS = {}
@@ -20,7 +21,7 @@ async def simulate_bot(name: str):
                 from manager import ConnectionManagerInstance
                 context = ConnectionManagerInstance.get_context()
                 from ai_bot import get_ai_response
-                reply = await get_ai_response(context,name)
+                reply = await get_ai_response(context, name)
                 
                 await websocket.send(reply)
     except Exception as e:
