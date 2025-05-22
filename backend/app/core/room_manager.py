@@ -34,6 +34,9 @@ class Room:
         self.bots[bot.bot_id] = bot
 
     async def broadcast(self, message: str):
+        """
+        Send a message to all human players in the room.
+        """
         for ws in self.human_players.values():
             await ws.send_text(message)
 

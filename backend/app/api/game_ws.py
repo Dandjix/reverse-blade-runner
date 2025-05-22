@@ -28,9 +28,6 @@ async def websocket_room_endpoint(websocket: WebSocket, room_id: str):
         pseudo = room.pseudos.get(player_id, f"Player{player_id[:4]}")
         room.pseudos[player_id] = pseudo
 
-        await websocket.send_text(f"🎮 Game started! Theme: {theme}")
-        await websocket.send_text(f"Your pseudo: {pseudo}")
-
         if room.message_history:
             await websocket.send_text("💬 Previous messages:")
             for author, msg in room.message_history:

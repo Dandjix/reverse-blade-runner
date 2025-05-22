@@ -48,22 +48,22 @@ async def start_game(room_id: str):
 
     player_ids = list(room.human_players.keys())
     room.game_state = GameState(room.params.language)
-    await room.game_state.initialize(player_ids)
+    await room.game_state.initialize(player_ids, room.params.nb_bots)
 
     room.pseudos.update(room.game_state.pseudos)
-
-    for i in range(room.params.nb_bots):
-        bot_id = f"bot{i}"
-        pseudo = f"Bot{i+1}"
-        personality = "friendly"
+    
+    for i, (pseudo, personality) in enumerate(room.game_state.bots_data):
+        bot_id = str(uuid.uuid4())[:8]
         bot = Bot(bot_id, pseudo, personality)
         room.add_bot(bot)
         room.pseudos[bot_id] = pseudo
+        # room.message_history.append((pseudo, f"*{pseudo}, {personality}, has joined the chat.*"))
+
 
     room.game_started = True
-    await room.broadcast(f"🎮 Game started! Theme: {room.game_state.theme}")
+    await room.broadcast(f"🎮 Game started! Theme: {room.game_state.theme}") # broadcast to send to everyone
     for pid, ws in room.human_players.items():
-        await ws.send_text(f"Your pseudo: {room.pseudos[pid]}")
+        await ws.send_text(f"Your pseudo: {room.pseudos[pid]}") # send_text to send to each player privately
 
     return {"status": "started"}
 
@@ -97,4 +97,31 @@ def get_all_rooms():
         })
     return {"rooms": rooms}
 
+
+@router.get("/room/{room_id}/players")
+async def get_players(room_id: str):
+    room = room_manager.get_room(room_id)
+    if not room:
+        return {"error": "Room not found"}
+
+    pseudos = list(room.pseudos.values())
+    return {"pseudos": pseudos}
+
+
+@router.post("/room/{room_id}/blame/{pseudo}")
+async def blame_player(room_id: str, pseudo: str):
+    room = room_manager.get_room(room_id)
+    if not room:
+        return {"error": "Room not found"}
+
+    player_id = next((pid for pid, p in room.pseudos.items() if p == pseudo), None)
+    if not player_id:
+        return {"error": "Pseudo not found"}
+
+    is_human = player_id in room.human_players
+
+    return {
+        "pseudo": pseudo,
+        "was_human": is_human
+    }
 
