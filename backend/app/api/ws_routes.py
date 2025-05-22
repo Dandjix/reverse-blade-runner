@@ -1,4 +1,3 @@
-# app/ws/game_ws.py
 import uuid
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
@@ -36,37 +35,10 @@ async def websocket_room_endpoint(websocket: WebSocket, room_id: str):
         while True:
             message = await websocket.receive_text()
 
-            if message.startswith("guess:"):
-                await handle_guess(room, player_id, message[6:].strip())
-            else:
-                room.message_history.append((pseudo, message))
-                await room.broadcast(f"{pseudo}: {message}")
+            room.message_history.append((pseudo, message))
+            await room.broadcast(f"{pseudo}: {message}")
 
     except WebSocketDisconnect:
         room.human_players.pop(player_id, None)
-        room.guessed_by_player.pop(player_id, None)
         room.pseudos.pop(player_id, None)
         await room.broadcast(f"🚪 {pseudo} disconnected.")
-
-
-async def handle_guess(room, player_id: str, guess_pseudo: str):
-    guessed_id = next((pid for pid, p in room.pseudos.items() if p == guess_pseudo), None)
-    player_ws = room.human_players.get(player_id)
-
-    if guessed_id is None:
-        await player_ws.send_text(f"❌ Unknown pseudo '{guess_pseudo}'")
-        return
-
-    if guessed_id == player_id:
-        await player_ws.send_text("❌ You cannot guess yourself.")
-        return
-
-    if guessed_id in room.human_players:
-        room.guessed_by_player[player_id].add(guessed_id)
-        await room.broadcast(f"✔️ {room.pseudos[player_id]} guessed {guess_pseudo}!")
-
-        if len(room.guessed_by_player[player_id]) == len(room.human_players) - 1:
-            room.game_started = False
-            await room.broadcast(f"🏆 {room.pseudos[player_id]} has won the game!")
-    else:
-        await player_ws.send_text(f"❌ {guess_pseudo} is not a human player. Try again.")
