@@ -19,16 +19,32 @@ async def safe_llm_call(chain, params):
                 print(f"\r🔄 LLM call in progress... {elapsed:.1f}s", end="", flush=True)
                 await asyncio.sleep(0.2)
 
-        # Démarrer le timer dans une tâche parallèle
         timer_task = asyncio.create_task(log_timer())
-
-        try:
-            result = await chain.ainvoke(params)
-        finally:
-            timer_task.cancel()
-            print(f"\r✅ LLM call completed in {time.time() - start:.1f}s        ")
-
-        await asyncio.sleep(1.2)  # Respecte le délai entre deux requêtes
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                result = await chain.ainvoke(params)
+                break
+            except Exception as e:
+                # Gestion du rate limit Mistral AI
+                if hasattr(e, 'status_code') and e.status_code == 429:
+                    print("[RateLimit] Trop de requêtes envoyées à l'API Mistral. Pause 15s...")
+                    await asyncio.sleep(10)
+                elif 'rate limit' in str(e).lower() or 'too many requests' in str(e).lower():
+                    print("[RateLimit] Message d'erreur Mistral détecté. Pause 15s...")
+                    await asyncio.sleep(10)
+                else:
+                    print(f"[LLM error] {e} (tentative {attempt+1}/{max_retries})")
+                    await asyncio.sleep(2)
+                if attempt == max_retries - 1:
+                    timer_task.cancel()
+                    print(f"\r❌ LLM call failed after {max_retries} attempts.")
+                    raise
+        else:
+            result = None
+        timer_task.cancel()
+        print(f"\r✅ LLM call completed in {time.time() - start:.1f}s        ")
+        # await asyncio.sleep(1.2)  # Respecte le délai entre deux requêtes
         return result
 
 llm = ChatMistralAI(
@@ -57,7 +73,7 @@ async def generate_pseudos_and_personalities(theme: str, count: int, language: s
         "This style should influence how the player writes messages (e.g., no capitalization, slang, typos, unintersted in the conversation, cold, kind, emojis like xD or :/ ...).\n"
         "Respond in {language} with each profile on its own line, formatted exactly like this:\n"
         "Pseudo: <username>, Personality: <short description of how they write>\n"
-        "Do not add anything else, no introductions or comments."
+        "Do not add anything else, no introductions, no comments, no characters like ** for bold or italics."
     )
     chain = prompt | llm | StrOutputParser()
 

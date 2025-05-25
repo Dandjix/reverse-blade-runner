@@ -1,7 +1,8 @@
 import uuid
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.core.room_manager import room_manager
+from app.core.room_manager_instance import room_manager
+from app.config import default_max_message_length, RESERVED_PSEUDOS, action_timeout
 
 router = APIRouter()
 
@@ -33,8 +34,17 @@ async def websocket_room_endpoint(websocket: WebSocket, room_id: str):
                 await websocket.send_text(f"{author}: {msg}")
 
         while True:
-            message = await websocket.receive_text()
-
+            try:
+                message = await asyncio.wait_for(websocket.receive_text(), timeout=action_timeout)
+            except asyncio.TimeoutError:
+                await websocket.send_text(f"⏰ Timeout: aucune action pendant {action_timeout}s.")
+                continue
+            if len(message) > default_max_message_length:
+                await websocket.send_text(f"❌ Message trop long (>{default_max_message_length} caractères)")
+                continue
+            if pseudo in RESERVED_PSEUDOS:
+                await websocket.send_text("❌ Ce pseudo est réservé.")
+                continue
             room.message_history.append((pseudo, message))
             await room.broadcast(f"{pseudo}: {message}")
 

@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 import uuid
-from app.core.room_manager import Room, room_manager
+from app.core.room import Room
+from app.core.room_manager_instance import room_manager
 
 router = APIRouter()
 
