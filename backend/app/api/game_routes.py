@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from app.core.room_manager_instance import room_manager
+from app.core.room_manager import room_manager
 from app.core.room import Room
-from app.core.room_manager import Bot
+from app.core.bot import Bot
 from app.core.player import Player
 from app.core.game_state import GameState
 import asyncio

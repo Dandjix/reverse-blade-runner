@@ -1,7 +1,14 @@
-class Bot:
-    def __init__(self, bot_id: str, pseudo: str, personality: str):
-        self.bot_id = bot_id
-        self.pseudo = pseudo
-        self.personality = personality
+from app.core.room import Room
+from typing import Dict
 
-# La classe RoomManager a été déplacée dans room_manager_instance.py
+class RoomManager:
+    def __init__(self):
+        self.rooms: Dict[str, Room] = {}
+
+    def add_room(self, room_id: str, room: Room):
+        self.rooms[room_id] = room
+
+    def get_room(self, room_id: str) -> Room:
+        return self.rooms.get(room_id)
+
+room_manager = RoomManager()

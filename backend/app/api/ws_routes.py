@@ -1,7 +1,7 @@
 import uuid
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from app.core.room_manager_instance import room_manager
+from app.core.room_manager import room_manager
 from app.config import default_max_message_length, RESERVED_PSEUDOS, action_timeout
 
 router = APIRouter()

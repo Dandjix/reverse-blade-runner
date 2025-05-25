@@ -2,7 +2,7 @@ from typing import Dict
 from fastapi import WebSocket
 from app.core.player import Player
 from app.core.room_params import RoomParams
-from app.core.room_manager import Bot
+from app.core.bot import Bot
 from app.services.llm_service import generate_bot_reply
 import asyncio
 import random
